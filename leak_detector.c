@@ -6,7 +6,7 @@
 /*   By: maperrea <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/22 16:23:50 by maperrea          #+#    #+#             */
-/*   Updated: 2020/02/23 21:36:10 by maperrea         ###   ########.fr       */
+/*   Updated: 2020/02/25 11:59:37 by maperrea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,9 @@ typedef struct	s_malloc
 	struct s_malloc	*next;
 }				t_malloc;
 
-static t_malloc *g_malloc_list;
+static t_malloc *__malloc_list;
 
-void	*malloc_leak(size_t size, const char *file, int line, const char *function)
+void	*__malloc_leak(size_t size, const char *file, int line, const char *function)
 {
 	void		*ptr;
 	t_malloc	*new_malloc;
@@ -50,13 +50,13 @@ void	*malloc_leak(size_t size, const char *file, int line, const char *function)
 	new_malloc->line = line;
 	new_malloc->next = NULL;
 	if (VERBOSE)
-		printf(">>> malloc in file %s at line %d in function %s at address %p\n",
+		printf(">>> \033[38;5;5mmalloc\033[0m in file \033[38;5;5m%s\033[0m at \033[38;5;5mline %d\033[0m in function \033[38;5;5m%s\033[0m at address %p\n",
 				file, line, function, ptr);
-	if (!g_malloc_list)
-		g_malloc_list = new_malloc;
+	if (!__malloc_list)
+		__malloc_list = new_malloc;
 	else
 	{
-		tmp = g_malloc_list;
+		tmp = __malloc_list;
 		while (tmp->next)
 			tmp = tmp->next;
 		tmp->next = new_malloc;
@@ -64,22 +64,22 @@ void	*malloc_leak(size_t size, const char *file, int line, const char *function)
 	return (ptr);
 }
 
-void	free_leak(void *ptr)
+void	__free_leak(void *ptr)
 {
 	t_malloc	*next;
 	t_malloc	*tmp;
 
 	if (!ptr)
 		return ;
-	tmp = g_malloc_list;
+	tmp = __malloc_list;
 	if (tmp->ptr == ptr)
 	{
 		next = tmp->next;
 		if (VERBOSE)
-			printf(">>> free of malloc from file %s at line %d in file %s at address %p\n", tmp->file, tmp->line, tmp->function, ptr);
+			printf(">>> \033[38;5;33mfree\033[0m of malloc from file \033[38;5;33m%s\033[0m at \033[38;5;33mline %d\033[0m in function \033[38;5;33m%s\033[0m at address %p\n", tmp->file, tmp->line, tmp->function, ptr);
 		free(ptr);
 		free(tmp);
-		g_malloc_list = next;
+		__malloc_list = next;
 	}
 	else
 	{
@@ -87,23 +87,23 @@ void	free_leak(void *ptr)
 			tmp = tmp->next;
 		next = tmp->next->next;
 		if (VERBOSE)
-			printf(">>> free of malloc from file %s at line %d in file %s at address %p\n", tmp->next->file, tmp->next->line, tmp->next->function, ptr);
+			printf(">>> \033[38;5;33mfree\033[0m of malloc from file \033[38;5;33m%s\033[0m at \033[38;5;33mline %d\033[0m in function \033[38;5;33m%s\033[0m at address %p\n", tmp->next->file, tmp->next->line, tmp->next->function, ptr);
 		free(ptr);
 		free(tmp->next);
 		tmp->next = next;
 	}
 }
 
-void		print_leaks()
+void		__print_leaks()
 {
-	if (!g_malloc_list)
+	if (!__malloc_list)
 	{
 		printf("\033[38;5;2m>>> No leaks!\n>>> Well played!\033[0m\n");
 	}
-	while(g_malloc_list)
+	while(__malloc_list)
 	{
-		printf("\n++++++++++++\npointer %p of size %li allocated in file \033[38;5;1m%s\033[0m at \033[38;5;1mline %d\033[0m in function \033[38;5;1m%s\033[m leaked\n", g_malloc_list->ptr, g_malloc_list->size, g_malloc_list->file, g_malloc_list->line, g_malloc_list->function);
-		printf("content: %.*s\n++++++++++++\n", (int)g_malloc_list->size, (char *)g_malloc_list->ptr);
-		g_malloc_list = g_malloc_list->next;
+		printf("\n++++++++++++\npointer %p of size %li allocated in file \033[38;5;1m%s\033[0m at \033[38;5;1mline %d\033[0m in function \033[38;5;1m%s\033[m leaked\n", __malloc_list->ptr, __malloc_list->size, __malloc_list->file, __malloc_list->line, __malloc_list->function);
+		printf("content: \033[38;5;2m%.*s\033[0m\n++++++++++++\n", (int)__malloc_list->size, (char *)__malloc_list->ptr);
+		__malloc_list = __malloc_list->next;
 	}
 }
