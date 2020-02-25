@@ -6,7 +6,7 @@
 /*   By: maperrea <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/22 15:28:48 by maperrea          #+#    #+#             */
-/*   Updated: 2020/02/25 11:55:12 by maperrea         ###   ########.fr       */
+/*   Updated: 2020/02/25 14:06:17 by maperrea         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,11 @@
 #  include <stdlib.h>
 
 void	*__malloc_leak(size_t size, const char *file, int line, const char *function);
-void	__free_leak(void *ptr);
+void	__free_leak(void *ptr, const char *file, int line, const char *function);
 void	__print_leaks();
 
 #  define malloc(X) __malloc_leak(X, __FILE__, __LINE__, __func__)
-#  define free(X)  __free_leak(X)
+#  define free(X)  __free_leak(X, __FILE__, __LINE__, __func__)
 #  undef CHECK_LEAKS
 #  define CHECK_LEAKS				\
 			do {					\
